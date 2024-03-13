@@ -26,22 +26,35 @@
 Image *readData(char *filename) 
 {
 	//YOUR CODE HERE
-    FILE *fp= fopen(filename,"r");
-    if(fp==NULL){
+    FILE* imagefile = fopen(filename, "r");
+    if (imagefile == NULL) {
+        printf("fail to open %s.\n", filename);
         return NULL;
     }
-    Image *image=(Image *) malloc(sizeof(Image));
-    fscanf(fp,"%u",&image->rows);
-    fscanf(fp,"%u",&image->cols);
-    int sum=image->cols*image->rows;
-    for(int i=0;i<sum;i++){
-        *(image->image+i)=(Color *) malloc(sizeof(Color));
-        Color *Pixel=*(image->image+i);
-        fscanf(fp,"%hhu %hhu %hhu",&Pixel->R,&Pixel->G,&Pixel->B);
+    Image *img = (Image*) malloc(sizeof(Image));
+    char format[3];
+    int maxcolor;
+    fscanf(imagefile, "%s", format);
+    if (format[0] != 'P' || format[1] != '3') {
+        printf("wrong ppm format\n");
+        return NULL;
     }
-    fclose(fp);
-    return image;
-
+    fscanf(imagefile, "%u", &img->cols);
+    fscanf(imagefile, "%u", &img->rows);
+    fscanf(imagefile, "%u", &maxcolor);
+    if (img->cols < 0 || img->rows < 0 || maxcolor != 255) {
+        printf("wrong ppm format\n");
+        return NULL;
+    }
+    int totpixels = img->rows * img->cols;
+    img->image = (Color**)malloc(sizeof(Color*) * totpixels);
+    for (int i = 0; i < totpixels; i++) {
+        *(img->image + i) = (Color*)malloc(sizeof(Color));
+        Color* pixel = *(img->image + i);
+        fscanf(imagefile, "%hhu %hhu %hhu", &pixel->R, &pixel->G, &pixel->B);
+    }
+    fclose(imagefile);
+    return img;
 }
 
 //Given an image, prints to stdout (e.g. with printf) a .ppm P3 file with the image's data.

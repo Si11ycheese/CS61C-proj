@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	//YOUR CODE HERE
     if (argc != 2) {
         printf("Usage: %s <colorfile>\n", argv[0]);
-        return 1;
+        return -1;
     }
     Image* img = readData(argv[1]);
     Image* steImage = steganography(img);
